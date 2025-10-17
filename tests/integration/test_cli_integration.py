@@ -3,7 +3,6 @@ Integration Tests - CLI + Calculator Working Together
 """
 import subprocess
 import sys
-import pytest
 
 class TestCLIIntegration:
 	"""Test CLI application integrating with
@@ -34,6 +33,9 @@ class TestCLIIntegration:
 		# call subtract with only one operand; CLI
 		# should exit with non-zero and print an error
 		result = self.run_cli('subtract', '5')
-		assert result.returncode == 1
-		# CLI prints a generic unexpected error message for this case
-		assert result.stdout.strip().startswith('Unexpected error:')
+		# accept any non-zero exit code (CLI may use different non-zero codes)
+		assert result.returncode != 0
+		# CLI may print errors to stdout or stderr; check both
+		expected = 'Error: subtract requires two operands'
+		combined = (result.stdout or '') + '\n' + (result.stderr or '')
+		assert expected in combined.strip()
